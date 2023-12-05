@@ -1,0 +1,33 @@
+import yfinance as yf
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import AdaBoostRegressor
+import numpy as np
+
+stock = yf.Ticker("BTC-USD")
+data = stock.history(start="2023-01-01")
+
+data['Date_Int'] = pd.to_datetime(data.index).astype('int64')
+
+X = data[['Date_Int']].values
+y = data['Close'].values
+
+regr = AdaBoostRegressor(DecisionTreeRegressor(max_depth=4), n_estimators=1, random_state=1)
+
+regr.fit(X, y)
+
+y_pred = regr.predict(X)
+y = np.log(y)
+y_pred = np.log(y_pred)
+
+plt.figure(figsize=(14, 7))
+plt.scatter(data['Date_Int'], y, color='blue', label='Logarithmic Real Prices')
+plt.plot(data['Date_Int'], y_pred, color='red', label='Logarithmic Predictions', linewidth=2)
+plt.title('Boosted Decision Tree Regression - Apple Stock Prices (2021 - Now) - Logarithmic Scale')
+plt.xlabel('Date')
+plt.ylabel('Log Price')
+plt.legend()
+plt.grid(True)
+plt.show()
